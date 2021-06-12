@@ -1,0 +1,64 @@
+import pandas as pd
+import Utils.mongodbpush as mongodbpush
+import requests
+import datetime
+
+
+class BinanceScraper:
+    def __init__(self):
+        # self.api_key = api_key
+        # self.secret_key = secret_key
+        self.server_time = requests.get('https://api.binance.com/api/v3/time').json()['serverTime']
+        self.columns = {0: 'Open_time',
+                        1: 'Open',
+                        2: 'High',
+                        3: 'Low',
+                        4: 'Close',
+                        5: 'Volume',
+                        6: 'Close_time',
+                        7: 'Quote_asset_volume',
+                        8: 'Number_of_trades',
+                        9: 'Taker_buy_base_asset_volume',
+                        10: 'Taker_buy_quote_asset_volume',
+                        11: 'Ignore',
+                        }
+
+    def get_historical_date(self, code, interval):
+        result = pd.DataFrame()
+        date = datetime.datetime(datetime.datetime.today().year, datetime.datetime.today().month,
+                                 datetime.datetime.today().day)
+        while date.year >= 2021:
+            try:
+                date_t_1 = int((date - datetime.datetime(1970, 1, 1)).total_seconds()) * 1000
+                date_t_0 = int(
+                    (date - datetime.timedelta(days=1) - datetime.datetime(1970, 1, 1)).total_seconds()) * 1000
+                date = date - datetime.timedelta(days=1)
+                req = requests.get(
+                    f'https://api.binance.com/api/v3/klines?symbol={code}&interval={interval}&startTime={date_t_0}&endTime={date_t_1}')
+                df = pd.DataFrame(req.json()).rename(columns=self.columns)
+                df['Open_time'] = pd.to_datetime(df['Open_time'] / 1000, unit='s')
+                df['Close_time'] = pd.to_datetime(df['Close_time'] / 1000, unit='s')
+                result = pd.concat([result, df])
+                print('Done : ', date)
+            except Exception as e:
+                print('Error : ', e)
+        try:
+            result['Spot'] = code
+            mongodbpush.push_pandas_mongodb(result, code)
+            print('##### Insertion suceed #####')
+
+        except Exception as e:
+            print(e)
+            print('##### Insertion failed #####')
+
+    def run(self):
+        self.get_historical_date('BTCBUSD', '1h')
+
+
+def run():
+    binance_api = BinanceScraper()
+    binance_api.run()
+
+
+if __name__ == '__main__':
+    run()
