@@ -27,7 +27,7 @@ class BinanceScraper:
         result = pd.DataFrame()
         date = datetime.datetime(datetime.datetime.today().year, datetime.datetime.today().month,
                                  datetime.datetime.today().day)
-        while date.year >= 2021:
+        while date.year >= 2015:
             try:
                 date_t_1 = int((date - datetime.datetime(1970, 1, 1)).total_seconds()) * 1000
                 date_t_0 = int(
@@ -44,6 +44,7 @@ class BinanceScraper:
                 print('Error : ', e)
         try:
             result['Spot'] = code
+            result.drop_duplicates(subset=['Open_time', 'Spot'], inplace=True)
             mongodbpush.push_pandas_mongodb(result, code)
             print('##### Insertion suceed #####')
 
@@ -53,6 +54,8 @@ class BinanceScraper:
 
     def run(self):
         self.get_historical_date('BTCBUSD', '1h')
+        self.get_historical_date('ETCBUSD', '1h')
+        self.get_historical_date('XRPBUSD', '1h')
 
 
 def run():
