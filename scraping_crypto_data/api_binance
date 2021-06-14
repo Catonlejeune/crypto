@@ -23,7 +23,7 @@ class BinanceScraper:
                         11: 'Ignore',
                         }
 
-    def get_historical_date(self, code, interval):
+    def get_historical_date_spot(self, code, interval):
         result = pd.DataFrame()
         date = datetime.datetime(datetime.datetime.today().year, datetime.datetime.today().month,
                                  datetime.datetime.today().day)
@@ -35,6 +35,7 @@ class BinanceScraper:
                 date = date - datetime.timedelta(days=1)
                 req = requests.get(
                     f'https://api.binance.com/api/v3/klines?symbol={code}&interval={interval}&startTime={date_t_0}&endTime={date_t_1}')
+                #On peut l'envoyer direct en json mais je voulais faire une modifie sur les dates
                 df = pd.DataFrame(req.json()).rename(columns=self.columns)
                 df['Open_time'] = pd.to_datetime(df['Open_time'] / 1000, unit='s')
                 df['Close_time'] = pd.to_datetime(df['Close_time'] / 1000, unit='s')
@@ -42,10 +43,42 @@ class BinanceScraper:
                 print('Done : ', date)
             except Exception as e:
                 print('Error : ', e)
+                print(df)
         try:
             result['Spot'] = code
             result.drop_duplicates(subset=['Open_time', 'Spot'], inplace=True)
-            mongodbpush.push_pandas_mongodb(result, code)
+            mongodbpush.push_pandas_mongodb(result, table='crypto_spot_database_1h', code=code)
+            print('##### Insertion suceed #####')
+        except Exception as e:
+            print(e)
+            print('##### Insertion failed #####')
+
+    #A finir  https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data
+    # Endpoint not good
+    def get_historical_date_fut(self, code, interval):
+        result = pd.DataFrame()
+        date = datetime.datetime(datetime.datetime.today().year, datetime.datetime.today().month,
+                                 datetime.datetime.today().day)
+        while date.year >= 2015:
+            try:
+                date_t_1 = int((date - datetime.datetime(1970, 1, 1)).total_seconds()) * 1000
+                date_t_0 = int(
+                    (date - datetime.timedelta(days=1) - datetime.datetime(1970, 1, 1)).total_seconds()) * 1000
+                date = date - datetime.timedelta(days=1)
+                req = requests.get(
+                    f'https://fapi.binance.com/api/v3/klines?symbol={code}&interval={interval}&startTime={date_t_0}&endTime={date_t_1}')
+                df = pd.DataFrame(req.json()).rename(columns=self.columns)
+                df['Open_time'] = pd.to_datetime(df['Open_time'] / 1000, unit='s')
+                df['Close_time'] = pd.to_datetime(df['Close_time'] / 1000, unit='s')
+                result = pd.concat([result, df])
+                print('Done : ', date)
+            except Exception as e:
+                print('Error : ', e)
+                print(df)
+        try:
+            result['Spot'] = code
+            result.drop_duplicates(subset=['Open_time', 'Spot'], inplace=True)
+            mongodbpush.push_pandas_mongodb(result, table='crypto_fut_database_1h', code=code)
             print('##### Insertion suceed #####')
 
         except Exception as e:
@@ -53,9 +86,9 @@ class BinanceScraper:
             print('##### Insertion failed #####')
 
     def run(self):
-        self.get_historical_date('BTCBUSD', '1h')
-        self.get_historical_date('ETCBUSD', '1h')
-        self.get_historical_date('XRPBUSD', '1h')
+        self.get_historical_date_spot('BTCBUSD', '1h')
+        self.get_historical_date_spot('ETCBUSD', '1h')
+        self.get_historical_date_spot('XRPBUSD', '1h')
 
 
 def run():
