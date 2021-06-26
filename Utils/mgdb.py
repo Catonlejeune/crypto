@@ -2,6 +2,7 @@ import pymongo
 import pandas as pd
 from tqdm import tqdm
 
+
 def push_pandas_mongodb(df, table, conn=None):
     if conn is None:
         conn = pymongo.MongoClient(
@@ -11,11 +12,10 @@ def push_pandas_mongodb(df, table, conn=None):
     collection = db[table]
     df_dict = df.to_dict("records")
     try:
-        for row in tqdm(df_dict):
-            collection.replace_one({'Open_time': row.get('Open_time'),
-                                    'Spot': row.get('Spot'),
-                                    'Interval': row.get('Interval')},
-                                   row, upsert=True)
+        collection.replace_one({'Open_time': df_dict['Open_time'],
+                                'Spot': df_dict['Spot'],
+                                'Interval': df_dict['Interval']},
+                               df_dict, upsert=True)
     except Exception as e:
         print(e)
 
