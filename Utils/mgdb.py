@@ -1,6 +1,6 @@
 import pymongo
 import pandas as pd
-
+from tqdm import tqdm
 
 def push_pandas_mongodb(df, table, conn=None):
     if conn is None:
@@ -11,7 +11,7 @@ def push_pandas_mongodb(df, table, conn=None):
     collection = db[table]
     df_dict = df.to_dict("records")
     try:
-        for row in df_dict:
+        for row in tqdm(df_dict):
             collection.replace_one({'Open_time': row.get('Open_time'),
                                     'Spot': row.get('Spot'),
                                     'Interval': row.get('Interval')},

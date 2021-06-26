@@ -77,22 +77,22 @@ class BinanceScraper:
     # Endpoint not good
     def run(self):
         self.get_historical_date_spot_data('BTCBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 1, 1))
+                                           date_fin=datetime.datetime(2019, 9, 18))
 
         self.get_historical_date_spot_data('ETHBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 1, 1))
+                                           date_fin=datetime.datetime(2019, 9, 18))
 
         self.get_historical_date_spot_data('ETH2BUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 1, 1))
+                                           date_fin=datetime.datetime(2019, 9, 18))
 
         self.get_historical_date_spot_data('BNBBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 1, 1))
+                                           date_fin=datetime.datetime(2019, 9, 18))
 
         self.get_historical_date_spot_data('DOGEBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 1, 1))
+                                           date_fin=datetime.datetime(2019, 9, 18))
 
         self.get_historical_date_spot_data('XRPBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 1, 1))
+                                           date_fin=datetime.datetime(2019, 9, 18))
 
 
 def run():
