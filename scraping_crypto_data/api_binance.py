@@ -35,11 +35,7 @@ class BinanceScraper:
                     (date - datetime.timedelta(days=1) - datetime.datetime(1970, 1, 1)).total_seconds()) * 1000
                 date = date - datetime.timedelta(days=1)
                 req = requests.get(
-                    f'''https://api.binance.com/api/v3/klines?
-                    symbol={code}
-                    &interval={interval}
-                    &startTime={date_t_0}
-                    &endTime={date_t_1}''')
+                    f'https://api.binance.com/api/v3/klines?symbol={code}&interval={interval}&startTime={date_t_0}&endTime={date_t_1}')
 
                 # On peut l'envoyer direct en json mais je voulais faire une modifie sur les dates
                 df = pd.DataFrame(req.json()).rename(columns=self.columns)
@@ -47,9 +43,9 @@ class BinanceScraper:
                 df['Close_time'] = pd.to_datetime(df['Close_time'] / 1000, unit='s')
                 df['interval'] = interval
                 result = pd.concat([result, df])
-                print('Done : ', date)
+                print('Done : ', date, code)
             except Exception as e:
-                print('Error : ', e)
+                print('Error : ', e, code)
                 print(df)
         try:
             result['Ssjacent'] = code
@@ -67,17 +63,17 @@ class BinanceScraper:
     # A finir  https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data
     # Endpoint not good
     def run(self):
-        self.get_historical_date_spot_data('BTCBUSD', '1s', date_debut=datetime.datetime.today(),
+        self.get_historical_date_spot_data('BTCBUSD', '1m', date_debut=datetime.datetime.today(),
                                            date_fin=datetime.datetime(2019, 1, 1))
-        self.get_historical_date_spot_data('ETHBUSD', '1s', date_debut=datetime.datetime.today(),
+        self.get_historical_date_spot_data('ETHBUSD', '1m', date_debut=datetime.datetime.today(),
                                            date_fin=datetime.datetime(2019, 1, 1))
-        self.get_historical_date_spot_data('ETH2BUSD', '1s', date_debut=datetime.datetime.today(),
+        self.get_historical_date_spot_data('ETH2BUSD', '1m', date_debut=datetime.datetime.today(),
                                            date_fin=datetime.datetime(2019, 1, 1))
-        self.get_historical_date_spot_data('BNBBUSD', '1s', date_debut=datetime.datetime.today(),
+        self.get_historical_date_spot_data('BNBBUSD', '1m', date_debut=datetime.datetime.today(),
                                            date_fin=datetime.datetime(2019, 1, 1))
-        self.get_historical_date_spot_data('DOGEBUSD', '1s', date_debut=datetime.datetime.today(),
+        self.get_historical_date_spot_data('DOGEBUSD', '1m', date_debut=datetime.datetime.today(),
                                            date_fin=datetime.datetime(2019, 1, 1))
-        self.get_historical_date_spot_data('XRPBUSD', '1s', date_debut=datetime.datetime.today(),
+        self.get_historical_date_spot_data('XRPBUSD', '1m', date_debut=datetime.datetime.today(),
                                            date_fin=datetime.datetime(2019, 1, 1))
 
 
