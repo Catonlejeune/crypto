@@ -50,8 +50,8 @@ class BinanceScraper:
                 #To set up a good data format
                 df['Open_time'] = pd.to_datetime(df['Open_time'] / 1000, unit='s')
                 df['Close_time'] = pd.to_datetime(df['Close_time'] / 1000, unit='s')
-                df['interval'] = interval
-
+                df['Ssjacent'] = code
+                df['Interval'] = interval
                 #Concat data in one dataframe
                 result = pd.concat([result, df])
                 print('Done : ', date, code)
@@ -59,11 +59,11 @@ class BinanceScraper:
                 print('Error : ', e, code)
                 print(df)
         try:
-            result['Ssjacent'] = code
-            result['Interval'] = interval
+
 
             # To push data
             result.drop_duplicates(subset=['Open_time', 'Ssjacent','Interval'], inplace=True)
+            print(result.shape)
             mongodbpush.push_pandas_mongodb(result, table='crypto_spot_database')
             print('##### Insertion suceed #####')
         except Exception as e:
@@ -76,23 +76,18 @@ class BinanceScraper:
     # A finir  https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data
     # Endpoint not good
     def run(self):
-        self.get_historical_date_spot_data('BTCBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 9, 18))
-
+        pass
         self.get_historical_date_spot_data('ETHBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 9, 18))
-
-        self.get_historical_date_spot_data('ETH2BUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 9, 18))
+                                           date_fin=datetime.datetime(2020, 1, 1))
 
         self.get_historical_date_spot_data('BNBBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 9, 18))
+                                          date_fin=datetime.datetime(2020, 1, 1))
 
         self.get_historical_date_spot_data('DOGEBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 9, 18))
+                                           date_fin=datetime.datetime(2020, 1, 1))
 
         self.get_historical_date_spot_data('XRPBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2019, 9, 18))
+                                       date_fin=datetime.datetime(2020, 1, 1))
 
 
 def run():

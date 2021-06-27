@@ -1,7 +1,7 @@
 import pymongo
 import pandas as pd
 from tqdm import tqdm
-
+import numpy as np
 
 def push_pandas_mongodb(df, table, conn=None):
     if conn is None:
@@ -10,12 +10,13 @@ def push_pandas_mongodb(df, table, conn=None):
             '=majority')
     db = conn.client['crypto_database']
     collection = db[table]
-    df_dict = df.to_dict("records")
+    df_dict = df.to_dict('records')
     try:
-        collection.replace_one({'Open_time': df_dict['Open_time'],
-                                'Spot': df_dict['Spot'],
-                                'Interval': df_dict['Interval']},
-                               df_dict, upsert=True)
+        for row in tqdm(df_dict):
+            collection.replace_one({'Open_time': row.get('Open_time'),
+                                    'Ssjacent': row.get('Ssjacent'),
+                                    'Interval': row.get('Interval')},
+                                   row, upsert=True)
     except Exception as e:
         print(e)
 
