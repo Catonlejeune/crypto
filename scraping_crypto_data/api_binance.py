@@ -2,7 +2,6 @@ import pandas as pd
 import Utils.mgdb as mongodbpush
 import requests
 import datetime
-import logging
 
 
 class BinanceScraper:
@@ -22,7 +21,7 @@ class BinanceScraper:
     #          date_debut, datetime object.
     #          date_fin, datetime object.
     # @Output : None
-    def get_historical_date_spot_data(self, code, interval, date_debut=None, date_fin=datetime.datetime(2018, 1, 1)):
+    def get_data_spot_data(self, code, interval, date_debut=None, date_fin=datetime.datetime(2018, 1, 1)):
         # Creation of a dataframe which will contain all data.
         result = pd.DataFrame()
 
@@ -70,24 +69,24 @@ class BinanceScraper:
             print(e)
             print('##### Insertion failed #####')
 
-    def update(self):
-        pass
-
     # A finir  https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data
     # Endpoint not good
-    def run(self):
-        pass
-        self.get_historical_date_spot_data('ETHBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2020, 1, 1))
+    def run(self,update=False):
+        if update:
+            read_mongo('crypto_spot_database', 'ETHBUSD', interval='1m')
+        else:
+            date_fin=datetime.datetime(2020, 1, 1)
+        self.get_data_spot_data('ETHBUSD', '1m', date_debut=datetime.datetime.today(),
+                                           date_fin=date_fin)
 
-        self.get_historical_date_spot_data('BNBBUSD', '1m', date_debut=datetime.datetime.today(),
-                                          date_fin=datetime.datetime(2020, 1, 1))
+        self.get_data_spot_data('BNBBUSD', '1m', date_debut=datetime.datetime.today(),
+                                          date_fin=date_fin)
 
-        self.get_historical_date_spot_data('DOGEBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=datetime.datetime(2020, 1, 1))
+        self.get_data_spot_data('DOGEBUSD', '1m', date_debut=datetime.datetime.today(),
+                                           date_fin=ddate_fin)
 
-        self.get_historical_date_spot_data('XRPBUSD', '1m', date_debut=datetime.datetime.today(),
-                                       date_fin=datetime.datetime(2020, 1, 1))
+        self.get_data_spot_data('XRPBUSD', '1m', date_debut=datetime.datetime.today(),
+                                       date_fin=date_fin)
 
 
 def run():
