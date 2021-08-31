@@ -63,7 +63,7 @@ class BinanceScraper:
             # To push data
             result.drop_duplicates(subset=['Open_time', 'Ssjacent','Interval'], inplace=True)
             print(result.shape)
-            result.to_csv(r'C:\Users\gco76\Documents\PythonScript\data.csv')
+            result.to_csv(rf'C:\Users\gco76\Documents\PythonScript\data_{code}.csv')
             # mongodbpush.push_pandas_mongodb(result, table='crypto_spot_database')
             print('##### Insertion suceed #####')
         except Exception as e:
