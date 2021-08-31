@@ -1,7 +1,6 @@
 import pymongo
 import pandas as pd
 from tqdm import tqdm
-import numpy as np
 
 def push_pandas_mongodb(df, table, conn=None):
     if conn is None:

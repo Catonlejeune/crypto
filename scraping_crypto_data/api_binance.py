@@ -63,7 +63,8 @@ class BinanceScraper:
             # To push data
             result.drop_duplicates(subset=['Open_time', 'Ssjacent','Interval'], inplace=True)
             print(result.shape)
-            mongodbpush.push_pandas_mongodb(result, table='crypto_spot_database')
+            result.to_csv(r'C:\Users\gco76\Documents\PythonScript\data.csv')
+            # mongodbpush.push_pandas_mongodb(result, table='crypto_spot_database')
             print('##### Insertion suceed #####')
         except Exception as e:
             print(e)
@@ -72,10 +73,7 @@ class BinanceScraper:
     # A finir  https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data
     # Endpoint not good
     def run(self,update=False):
-        if update:
-            read_mongo('crypto_spot_database', 'ETHBUSD', interval='1m')
-        else:
-            date_fin=datetime.datetime(2020, 1, 1)
+        date_fin=datetime.datetime(2020, 1, 1)
         self.get_data_spot_data('ETHBUSD', '1m', date_debut=datetime.datetime.today(),
                                            date_fin=date_fin)
 
@@ -83,7 +81,7 @@ class BinanceScraper:
                                           date_fin=date_fin)
 
         self.get_data_spot_data('DOGEBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=ddate_fin)
+                                           date_fin=date_fin)
 
         self.get_data_spot_data('XRPBUSD', '1m', date_debut=datetime.datetime.today(),
                                        date_fin=date_fin)
