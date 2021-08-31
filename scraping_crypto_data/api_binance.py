@@ -14,13 +14,13 @@ class BinanceScraper:
                         7: 'Quote_asset_volume', 8: 'Number_of_trades', 9: 'Taker_buy_base_asset_volume',
                         10: 'Taker_buy_quote_asset_volume', 11: 'Ignore'}
 
-    # get historical date for spot product OPHC
+    # get historical data for spot product OPHC
     # @Input : Scraper object.
     #          Code product.
     #          frequency interval ('1s','1h' etc cf binance)
     #          date_debut, datetime object.
     #          date_fin, datetime object.
-    # @Output : None
+    # @Output : CSV with all data for one code
     def get_data_spot_data(self, code, interval, date_debut=None, date_fin=datetime.datetime(2018, 1, 1)):
         # Creation of a dataframe which will contain all data.
         result = pd.DataFrame()
