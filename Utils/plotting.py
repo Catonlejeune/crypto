@@ -1,4 +1,4 @@
-import mgdb as mgdb
+import sqldb as mgdb
 import pandas as pd
 import matplotlib.pyplot as plt
 
