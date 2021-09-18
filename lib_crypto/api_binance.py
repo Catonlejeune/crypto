@@ -76,9 +76,8 @@ class BinanceScraper:
 
             sql.insert_update_sql(self.df_insert_cryptofiat_df,
                                   table='cryptotfiat_df',
-                                  primary_key=['Open_time','Close_time','Code'],
+                                  primary_key=['Open_time','Close_time','Code','Interval'],
                                   do_update=True)
-            # mongodbpush.push_pandas_mongodb(result, table='crypto_spot_database')
             self.logger.info(f'##### Insertion suceed #####')
             print('##### Insertion suceed #####')
 

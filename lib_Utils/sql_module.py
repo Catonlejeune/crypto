@@ -41,7 +41,7 @@ def insert_update_sql(df, table, primary_key, conn=None, do_update=True):
         query += f"""{' ,'.join( col + '=values('+col+')' for col in df.columns[~df.columns.isin(primary_key)])};"""
     else:
         query += f"""{' ,'.join( col + '=' +col  for col in df.columns[~df.columns.isin(primary_key)])};"""
-
+    print(query)
     cursor = conn.cursor()
     cursor.execute(query)
     conn.commit()
