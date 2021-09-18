@@ -34,17 +34,11 @@ def insert_update_sql(df, table, primary_key, conn=None, update=True):
     if conn is None:
         conn = get_sql_connection()
 
-    query = f"""Insert INTO {table}({tuple([col for col in df.columns])}) VALUES"""
-    for idx, row in df.iterrow():
+    query = f"""Insert INTO {table}({' ,'.join(col for col in df.columns)}) VALUES"""
+    for idx, row in df.iterrows():
         query += f"""{tuple([values for values in row])},"""
-    query = query[:-1] + """ ON DUPLICATE KEY UPDATE"""
-    if update:
-        for col in df.columns[~df.columns.isin(primary_key)]:
-            query += f"""{col + '= values(' + col + '),'}"""
-    else:
-        for col in df.columns[~df.columns.isin(primary_key)]:
-            query += f"""{col + '= ' + col + ','}"""
-    query = query[:-1]
+    query = query[:-1] + """ ON DUPLICATE KEY UPDATE """
+    query += f"""{' ,'.join( col + '=values('+col+')' for col in df.columns[~df.columns.isin(primary_key)])};"""
 
     cursor = conn.cursor()
     cursor.execute(query)
