@@ -8,8 +8,7 @@ def get_environnement():
     Get data in the onnection_aws.txt
     :return: dict with connection data
     """
-    return \
-    pd.read_csv(fr'{os.path.dirname(os.path.abspath("connection_aws.txt"))}\crypto\lib_crypto\connection_aws.txt',
+    return pd.read_csv(fr'C:\Users\connection_aws.txt',
                 sep="=", header=None).set_index(0)[1].to_dict()
 
 
@@ -23,7 +22,7 @@ def get_sql_connection():
                            passwd=dict_data['PASSWORD '], database=dict_data['DBNAME'])
 
 
-def insert_update_sql(df, table, primary_key, conn=None, update=True):
+def insert_update_sql(df, table, primary_key, conn=None, do_update=True):
     """
     Insert or update the table
     :param df: Dataframe of the data that we want to push into the DB
@@ -38,7 +37,10 @@ def insert_update_sql(df, table, primary_key, conn=None, update=True):
     for idx, row in df.iterrows():
         query += f"""{tuple([values for values in row])},"""
     query = query[:-1] + """ ON DUPLICATE KEY UPDATE """
-    query += f"""{' ,'.join( col + '=values('+col+')' for col in df.columns[~df.columns.isin(primary_key)])};"""
+    if do_update:
+        query += f"""{' ,'.join( col + '=values('+col+')' for col in df.columns[~df.columns.isin(primary_key)])};"""
+    else:
+        query += f"""{' ,'.join( col + '=' +col  for col in df.columns[~df.columns.isin(primary_key)])};"""
 
     cursor = conn.cursor()
     cursor.execute(query)
