@@ -22,6 +22,14 @@ def get_sql_connection():
                            passwd=dict_data['PASSWORD '], database=dict_data['DBNAME'])
 
 
+def get_df(query):
+    """
+    Get market data from a table of the BDD
+    :param query: str
+    :return: df
+    """
+    return pd.read_sql(query,con=get_sql_connection())
+
 def insert_update_sql(df, table, primary_key, conn=None, do_update=True):
     """
     Insert or update the table
