@@ -45,3 +45,5 @@ def insert_update_sql(df, table, primary_key, conn=None, do_update=True):
     cursor = conn.cursor()
     cursor.execute(query)
     conn.commit()
+    conn.close()
+    pymysql.connections

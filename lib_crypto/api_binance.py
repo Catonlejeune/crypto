@@ -14,8 +14,6 @@ class BinanceApi:
         """
         Initalisation of the Binance Api object
         """
-        self.df_insert_cryptofiat_df = pd.DataFrame()
-        self.df_code = pd.DataFrame()
         self.logger = logging.getLogger(self.__class__.__name__ + "_Basic_Logger")
         self.logger_file_handler = logging.FileHandler("log_api_binance.log")
         self.logger_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -57,45 +55,41 @@ class BinanceApi:
                     f'https://api.binance.com/api/v3/klines?symbol={code}&interval={interval}&startTime={date_t_0}&endTime={date_t_1}')
 
                 # To change json response to a dataframe
-                df = pd.DataFrame(req.json()).rename(columns=self.columns)
+                df_insert_cryptofiat_df = pd.DataFrame(req.json()).rename(columns=self.columns)
 
                 # To set up a good data format
-                df['Open_time'] = pd.to_datetime(df['Open_time'] / 1000, unit='s')
-                df['Close_time'] = pd.to_datetime(df['Close_time'] / 1000, unit='s')
-                df.columns = df.columns.str.lower()
-                df['code'] = code
-                df['interval_sample'] = interval
-                df.rename(columns={'open': 'open_price', 'high': 'high_price',
+                df_insert_cryptofiat_df['Open_time'] = pd.to_datetime(df_insert_cryptofiat_df['Open_time'] / 1000, unit='s')
+                df_insert_cryptofiat_df['Close_time'] = pd.to_datetime(df_insert_cryptofiat_df['Close_time'] / 1000, unit='s')
+                df_insert_cryptofiat_df.columns = df_insert_cryptofiat_df.columns.str.lower()
+                df_insert_cryptofiat_df['code'] = code
+                df_insert_cryptofiat_df['interval_sample'] = interval
+                df_insert_cryptofiat_df.rename(columns={'open': 'open_price', 'high': 'high_price',
                                    'low': 'low_price', 'close': 'close_price',
                                    'ignore': 'ignore_bool'},inplace=True)
                 # Concat data in one dataframe
-                self.df_insert_cryptofiat_df = pd.concat([self.df_insert_cryptofiat_df, df])
+                df_insert_cryptofiat_df.drop_duplicates(subset=['open_time', 'code', 'interval_sample'],
+                                                            inplace=True)
+                df_code = df_insert_cryptofiat_df[['code']].drop_duplicates(subset=['code'])
+                df_code['source'] = 'Binance'
+                sql.insert_update_sql(df_code,
+                                      table='defcodecrypto',
+                                      primary_key=['Code'],
+                                      do_update=False)
+
+                sql.insert_update_sql(df_insert_cryptofiat_df,
+                                      table='cryptotfiat_df',
+                                      primary_key=['Open_time', 'Close_time', 'Code', 'Interval'],
+                                      do_update=True)
+                self.logger.info(f'##### Insertion suceed #####')
+                print('##### Insertion suceed #####')
                 self.logger.info(f'Done : {date}, {code}')
                 print(f'Done : {date}, {code}')
             except Exception as e:
                 print(f'Error : {date}, {code}, {e}')
                 self.logger.error(f'Error : {date}, {code}, {e}')
-        try:
-            # To push data
-            self.df_insert_cryptofiat_df.drop_duplicates(subset=['open_time', 'code', 'interval_sample'], inplace=True)
-            self.df_code = self.df_insert_cryptofiat_df[['code']].drop_duplicates(subset=['code'])
-            self.df_code['source'] = 'Binance'
-            sql.insert_update_sql(self.df_code,
-                                  table='defcodecrypto',
-                                  primary_key=['Code'],
-                                  do_update=False)
+                print('##### Insertion failed #####')
 
-            sql.insert_update_sql(self.df_insert_cryptofiat_df,
-                                  table='cryptotfiat_df',
-                                  primary_key=['Open_time', 'Close_time', 'Code', 'Interval'],
-                                  do_update=True)
-            self.logger.info(f'##### Insertion suceed #####')
-            print('##### Insertion suceed #####')
 
-        except Exception as e:
-            print(f'Error :  {e}')
-            self.logger.error(f'Error : {e}')
-            print('##### Insertion failed #####')
 
     def run(self, update=False):
         date_fin = datetime.datetime(2020, 1, 1)
