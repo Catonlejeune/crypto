@@ -5,12 +5,15 @@ import logging
 import lib_Utils.sql_module as sql
 
 
-class BinanceScraper:
+class BinanceApi:
     """
     Class to get data from the API Binance
     """
 
     def __init__(self):
+        """
+        Initalisation of the Binance Api object
+        """
         self.df_insert_cryptofiat_df = pd.DataFrame()
         self.df_code = pd.DataFrame()
         self.logger = logging.getLogger(self.__class__.__name__ + "_Basic_Logger")
@@ -24,14 +27,16 @@ class BinanceScraper:
                         7: 'Quote_asset_volume', 8: 'Number_of_trades', 9: 'Taker_buy_base_asset_volume',
                         10: 'Taker_buy_quote_asset_volume', 11: 'Ignore'}
 
-    # get historical data for spot product OPHC
-    # @Input : Scraper object.
-    #          Code product.
-    #          frequency interval ('1s','1h' etc cf binance)
-    #          date_debut, datetime object.
-    #          date_fin, datetime object.
-    # @Output : CSV with all data for one code
+
     def get_data_spot_data(self, code, interval, date_debut=None, date_fin=datetime.datetime(2018, 1, 1)):
+        """
+        Get data from Binance api
+        :param code: str for instance 'BTCETH'
+        :param interval: str '1m', '1h' etc
+        :param date_debut: datetime
+        :param date_fin: datetime
+        :return: None, insertion into BDD
+        """
         # Creation of a dataframe which will contain all data.
         if date_debut:
             date = date_debut
@@ -92,8 +97,6 @@ class BinanceScraper:
             self.logger.error(f'Error : {e}')
             print('##### Insertion failed #####')
 
-    # A finir  https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data
-    # Endpoint not good
     def run(self, update=False):
         date_fin = datetime.datetime(2020, 1, 1)
         self.get_data_spot_data('ETHTUSD', '1m', date_debut=datetime.datetime.today(),
@@ -118,7 +121,7 @@ class BinanceScraper:
 
 
 def run():
-    binance_api = BinanceScraper()
+    binance_api = BinanceApi()
     binance_api.run()
 
 
