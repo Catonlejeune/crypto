@@ -4,10 +4,12 @@ import datetime
 import logging
 import lib_Utils.sql_module as sql
 
+
 class BinanceScraper:
     """
     Class to get data from the API Binance
     """
+
     def __init__(self):
         self.df_insert_cryptofiat_df = pd.DataFrame()
         self.df_code = pd.DataFrame()
@@ -17,7 +19,7 @@ class BinanceScraper:
         self.logger_file_handler.setFormatter(self.logger_formatter)
         self.logger.addHandler(self.logger_file_handler)
 
-        #To rename columns in function
+        # To rename columns in function
         self.columns = {0: 'Open_time', 1: 'Open', 2: 'High', 3: 'Low', 4: 'Close', 5: 'Volume', 6: 'Close_time',
                         7: 'Quote_asset_volume', 8: 'Number_of_trades', 9: 'Taker_buy_base_asset_volume',
                         10: 'Taker_buy_quote_asset_volume', 11: 'Ignore'}
@@ -36,7 +38,7 @@ class BinanceScraper:
         else:
             date = datetime.datetime(datetime.datetime.today().year, datetime.datetime.today().month,
                                      datetime.datetime.today().day)
-        #loop to laod code data from date_debut to date_fin
+        # loop to laod code data from date_debut to date_fin
         while date >= date_fin:
             try:
                 # recurences on the dates
@@ -52,12 +54,16 @@ class BinanceScraper:
                 # To change json response to a dataframe
                 df = pd.DataFrame(req.json()).rename(columns=self.columns)
 
-                #To set up a good data format
+                # To set up a good data format
                 df['Open_time'] = pd.to_datetime(df['Open_time'] / 1000, unit='s')
                 df['Close_time'] = pd.to_datetime(df['Close_time'] / 1000, unit='s')
-                df['Code'] = code
-                df['Interval'] = interval
-                #Concat data in one dataframe
+                df.columns = df.columns.str.lower()
+                df['code'] = code
+                df['interval_sample'] = interval
+                df.rename(columns={'open': 'open_price', 'high': 'high_price',
+                                   'low': 'low_price', 'close': 'close_price',
+                                   'ignore': 'ignore_bool'},inplace=True)
+                # Concat data in one dataframe
                 self.df_insert_cryptofiat_df = pd.concat([self.df_insert_cryptofiat_df, df])
                 self.logger.info(f'Done : {date}, {code}')
                 print(f'Done : {date}, {code}')
@@ -66,9 +72,9 @@ class BinanceScraper:
                 self.logger.error(f'Error : {date}, {code}, {e}')
         try:
             # To push data
-            self.df_insert_cryptofiat_df.drop_duplicates(subset=['Open_time', 'Code','Interval'], inplace=True)
-            self.df_code = self.df_insert_cryptofiat_df[['Code']].drop_duplicates(subset=['Code'])
-            self.df_code['Source'] = 'Binance'
+            self.df_insert_cryptofiat_df.drop_duplicates(subset=['open_time', 'code', 'interval_sample'], inplace=True)
+            self.df_code = self.df_insert_cryptofiat_df[['code']].drop_duplicates(subset=['code'])
+            self.df_code['source'] = 'Binance'
             sql.insert_update_sql(self.df_code,
                                   table='defcodecrypto',
                                   primary_key=['Code'],
@@ -76,7 +82,7 @@ class BinanceScraper:
 
             sql.insert_update_sql(self.df_insert_cryptofiat_df,
                                   table='cryptotfiat_df',
-                                  primary_key=['Open_time','Close_time','Code','Interval'],
+                                  primary_key=['Open_time', 'Close_time', 'Code', 'Interval'],
                                   do_update=True)
             self.logger.info(f'##### Insertion suceed #####')
             print('##### Insertion suceed #####')
@@ -86,23 +92,29 @@ class BinanceScraper:
             self.logger.error(f'Error : {e}')
             print('##### Insertion failed #####')
 
-
-
     # A finir  https://binance-docs.github.io/apidocs/futures/en/#continuous-contract-kline-candlestick-data
     # Endpoint not good
-    def run(self,update=False):
-        date_fin=datetime.datetime(2021, 9, 1)
-        self.get_data_spot_data('ETHBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=date_fin)
+    def run(self, update=False):
+        date_fin = datetime.datetime(2020, 1, 1)
+        self.get_data_spot_data('ETHTUSD', '1m', date_debut=datetime.datetime.today(),
+                                date_fin=date_fin)
+        self.get_data_spot_data('BTCTUSD', '1m', date_debut=datetime.datetime.today(),
+                                date_fin=date_fin)
 
-        self.get_data_spot_data('BNBBUSD', '1m', date_debut=datetime.datetime.today(),
-                                          date_fin=date_fin)
+        self.get_data_spot_data('BNBTUSD', '1m', date_debut=datetime.datetime.today(),
+                                date_fin=date_fin)
 
-        self.get_data_spot_data('DOGEBUSD', '1m', date_debut=datetime.datetime.today(),
-                                           date_fin=date_fin)
+        self.get_data_spot_data('DOGETUSD', '1m', date_debut=datetime.datetime.today(),
+                                date_fin=date_fin)
 
-        self.get_data_spot_data('XRPBUSD', '1m', date_debut=datetime.datetime.today(),
-                                       date_fin=date_fin)
+        self.get_data_spot_data('XRPTUSD', '1m', date_debut=datetime.datetime.today(),
+                                date_fin=date_fin)
+
+        self.get_data_spot_data('ADATUSD', '1m', date_debut=datetime.datetime.today(),
+                                date_fin=date_fin)
+
+        self.get_data_spot_data('SOLTUSD', '1m', date_debut=datetime.datetime.today(),
+                                date_fin=date_fin)
 
 
 def run():
