@@ -25,7 +25,6 @@ class BinanceApi:
                         7: 'Quote_asset_volume', 8: 'Number_of_trades', 9: 'Taker_buy_base_asset_volume',
                         10: 'Taker_buy_quote_asset_volume', 11: 'Ignore'}
 
-
     def get_data_spot_data(self, code, interval, date_debut=None, date_fin=datetime.datetime(2018, 1, 1)):
         """
         Get data from Binance api
@@ -58,17 +57,19 @@ class BinanceApi:
                 df_insert_cryptofiat_df = pd.DataFrame(req.json()).rename(columns=self.columns)
 
                 # To set up a good data format
-                df_insert_cryptofiat_df['Open_time'] = pd.to_datetime(df_insert_cryptofiat_df['Open_time'] / 1000, unit='s')
-                df_insert_cryptofiat_df['Close_time'] = pd.to_datetime(df_insert_cryptofiat_df['Close_time'] / 1000, unit='s')
+                df_insert_cryptofiat_df['Open_time'] = pd.to_datetime(df_insert_cryptofiat_df['Open_time'] / 1000,
+                                                                      unit='s')
+                df_insert_cryptofiat_df['Close_time'] = pd.to_datetime(df_insert_cryptofiat_df['Close_time'] / 1000,
+                                                                       unit='s')
                 df_insert_cryptofiat_df.columns = df_insert_cryptofiat_df.columns.str.lower()
                 df_insert_cryptofiat_df['code'] = code
                 df_insert_cryptofiat_df['interval_sample'] = interval
                 df_insert_cryptofiat_df.rename(columns={'open': 'open_price', 'high': 'high_price',
-                                   'low': 'low_price', 'close': 'close_price',
-                                   'ignore': 'ignore_bool'},inplace=True)
+                                                        'low': 'low_price', 'close': 'close_price',
+                                                        'ignore': 'ignore_bool'}, inplace=True)
                 # Concat data in one dataframe
                 df_insert_cryptofiat_df.drop_duplicates(subset=['open_time', 'code', 'interval_sample'],
-                                                            inplace=True)
+                                                        inplace=True)
                 df_code = df_insert_cryptofiat_df[['code']].drop_duplicates(subset=['code'])
                 df_code['source'] = 'Binance'
                 sql.insert_update_sql(df_code,
@@ -89,10 +90,11 @@ class BinanceApi:
                 self.logger.error(f'Error : {date}, {code}, {e}')
                 print('##### Insertion failed #####')
 
-
-
     def run(self, update=False):
-        date_fin = datetime.datetime(2020, 1, 1)
+        if update:
+            date_fin = datetime.datetime.today() - datetime.timedelta(days=30)
+        else:
+            date_fin = datetime.datetime(2020, 1, 1)
         self.get_data_spot_data('ETHTUSD', '1m', date_debut=datetime.datetime.today(),
                                 date_fin=date_fin)
         self.get_data_spot_data('BTCTUSD', '1m', date_debut=datetime.datetime.today(),
@@ -116,7 +118,7 @@ class BinanceApi:
 
 def run():
     binance_api = BinanceApi()
-    binance_api.run()
+    binance_api.run(update=True)
 
 
 if __name__ == '__main__':
