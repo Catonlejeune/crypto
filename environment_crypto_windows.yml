@@ -1,0 +1,4 @@
+name: crypto_windows
+channels:
+  - defaults
+prefix: C:\Users\gco76\anaconda3\envs\crypto_windows
